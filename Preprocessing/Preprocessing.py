@@ -42,11 +42,3 @@ class Prepocessing():
     def plot_graph(self):
         plt.plot(self.frame['Adj Close'])
         plt.show()
-
-cls = Prepocessing('TimeSeries//Algn.csv')
-y = cls.creat_target()
-x = cls.creat_features()
-print(len(y))
-print(len(x))
-print(len(x[4494]))
-print(y[4494])
