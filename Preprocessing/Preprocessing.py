@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
 import os
 
 
@@ -29,15 +28,22 @@ class Prepocessing():
 
 
     def creat_target(self):
-        return np.array(self.frame['Adj Close'].values[30:])
+        self.__targets = np.array(self.frame['Adj Close'].values[30:])
 
 
     def creat_features(self):
         features = []
         for i in range(len(self.frame['Adj Close'].values)-30):
             features.append(self.frame['Adj Close'].values[i:i+30])
-        return np.array(features)
+        self.__features = features
 
+
+    def split(self):
+        train_start = 0
+        train_end = int(np.floor(0.8 * len(self.__features)))
+        test_start = train_end
+        test_end = len(self.__features)
+        return self.__features[np.arange(train_start, train_end), :]
 
     def plot_graph(self):
         plt.plot(self.frame['Adj Close'])
