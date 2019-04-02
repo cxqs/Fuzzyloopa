@@ -1,11 +1,11 @@
+from Model import Fuzzyloopa
+
 import time
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
-from Model.Model import Fuzzyloopa
 
 
-# Mackey-Glass series computation
 def mackey(n_iters):
     x = np.zeros((n_iters,))
     x[0:30] = 0.23 * np.ones((30,))
@@ -18,13 +18,13 @@ def mackey(n_iters):
     return x
 
 
-# Generate dataset
 D = 4  # number of regressors
 T = 1  # delay
-N = 2000  # Number of points to generate
+N = 1000  # Number of points to generate
 mg_series = mackey(N)[499:]  # Use last 1500 points
 data = np.zeros((N - 500 - T - (D - 1) * T, D))
 lbls = np.zeros((N - 500 - T - (D - 1) * T,))
+
 
 for t in range((D - 1) * T, N - 500 - T):
     data[t - (D - 1) * T, :] = [mg_series[t - 3 * T], mg_series[t - 2 * T], mg_series[t - T], mg_series[t]]
@@ -34,7 +34,7 @@ trnLbls = lbls[:lbls.size - round(lbls.size * 0.3)]
 chkData = data[lbls.size - round(lbls.size * 0.3):, :]
 chkLbls = lbls[lbls.size - round(lbls.size * 0.3):]
 
-# ANFIS params and Tensorflow graph initialization
+
 m = 16  # number of rules
 alpha = 0.01  # learning rate
 
@@ -45,38 +45,23 @@ num_epochs = 100
 
 # Initialize session to make computations on the Tensorflow graph
 with tf.Session() as sess:
-    # Initialize model parameters
     sess.run(fis.init_variables)
     trn_costs = []
     val_costs = []
     time_start = time.time()
     for epoch in range(num_epochs):
-        #  Run an update step
         trn_loss, trn_pred = fis.train(sess, trnData, trnLbls)
-        # Evaluate on validation set
-        val_pred, val_loss = fis.make_prediction(sess, chkData)
+        val_pred, val_loss = fis.make_prediction(sess, chkData, chkLbls)
         if epoch % 10 == 0:
             print("Train cost after epoch %i: %f" % (epoch, trn_loss))
         if epoch == num_epochs - 1:
             time_end = time.time()
             print("Elapsed time: %f" % (time_end - time_start))
             print("Validation loss: %f" % val_loss)
-            # Plot real vs. predicted
             pred = np.vstack((np.expand_dims(trn_pred, 1), np.expand_dims(val_pred, 1)))
             plt.figure(1)
             plt.plot(mg_series)
             plt.plot(pred)
         trn_costs.append(trn_loss)
         val_costs.append(val_loss)
-    # Plot the cost over epochs
-    plt.figure(2)
-    plt.subplot(2, 1, 1)
-    plt.plot(np.squeeze(trn_costs))
-    plt.title("Training loss, Learning rate =" + str(alpha))
-    plt.subplot(2, 1, 2)
-    plt.plot(np.squeeze(val_costs))
-    plt.title("Validation loss, Learning rate =" + str(alpha))
-    plt.ylabel('Cost')
-    plt.xlabel('Epochs')
-    # Plot resulting membership functions
     plt.show()
