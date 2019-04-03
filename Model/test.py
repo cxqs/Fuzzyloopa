@@ -1,8 +1,10 @@
 from Model import Fuzzyloopa
+from pre.Preprocessing import Prepocessing as prep
 
 import time
 import tensorflow as tf
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
 
@@ -22,20 +24,31 @@ D = 4  # number of regressors
 T = 1  # delay
 N = 1000  # Number of points to generate
 mg_series = mackey(N)[499:]  # Use last 1500 points
+# frame = pd.read_csv('TimeSeries/Algn.csv')
+# series = frame['Adj Close'].values[:1000]
+#
+# series= prep('TimeSeries/Algn.csv')
+# series.creat_features()
+# series.creat_target()
+#
+# data = np.array(series.features)
+# lbls = np.array(series.targets)
+
 data = np.zeros((N - 500 - T - (D - 1) * T, D))
 lbls = np.zeros((N - 500 - T - (D - 1) * T,))
+
 
 
 for t in range((D - 1) * T, N - 500 - T):
     data[t - (D - 1) * T, :] = [mg_series[t - 3 * T], mg_series[t - 2 * T], mg_series[t - T], mg_series[t]]
     lbls[t - (D - 1) * T] = mg_series[t + T]
-trnData = data[:lbls.size - round(lbls.size * 0.3), :]
+trnData = data[:lbls.size - round(len(lbls) * 0.3), :]
 trnLbls = lbls[:lbls.size - round(lbls.size * 0.3)]
 chkData = data[lbls.size - round(lbls.size * 0.3):, :]
 chkLbls = lbls[lbls.size - round(lbls.size * 0.3):]
 
 
-m = 16  # number of rules
+m = 5  # number of rules
 alpha = 0.01  # learning rate
 
 fis = Fuzzyloopa(n_inputs=D, n_rules=m, learning_rate=alpha)
@@ -49,7 +62,7 @@ with tf.Session() as sess:
     trn_costs = []
     val_costs = []
     time_start = time.time()
-    for epoch in range(num_epochs):
+    for epoch in range(100):
         trn_loss, trn_pred = fis.train(sess, trnData, trnLbls)
         val_pred, val_loss = fis.make_prediction(sess, chkData, chkLbls)
         if epoch % 10 == 0:
@@ -60,6 +73,7 @@ with tf.Session() as sess:
             print("Validation loss: %f" % val_loss)
             pred = np.vstack((np.expand_dims(trn_pred, 1), np.expand_dims(val_pred, 1)))
             plt.figure(1)
+            # plt.plot(series.targets)
             plt.plot(mg_series)
             plt.plot(pred)
         trn_costs.append(trn_loss)

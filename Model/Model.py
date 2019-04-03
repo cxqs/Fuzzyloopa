@@ -28,11 +28,8 @@ class Fuzzyloopa():
         self.optimize = tf.train.AdamOptimizer(learning_rate=0.01).minimize(self.loss)
         self.init_variables = tf.global_variables_initializer()
 
-    def make_prediction(self, sess, x, targets=None):
-        if targets is None:
-            return sess.run(self.out, feed_dict={self.inputs: x})
-        else:
-            return sess.run([self.out, self.loss], feed_dict={self.inputs: x, self.targets: targets})
+    def make_prediction(self, sess, x, targets):
+        return sess.run([self.out, self.loss], feed_dict={self.inputs: x, self.targets: targets})
 
     def train(self, sess, x , targets):
         out, l, _ = sess.run([self.out, self.loss, self.optimize], feed_dict={self.inputs: x, self.targets: targets})
