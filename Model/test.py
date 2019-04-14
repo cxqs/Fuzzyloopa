@@ -1,8 +1,10 @@
-from Model import Fuzzyloopa
+from Models import Fuzzyloopa
+from pre.Preprocessing import Prepocessing as prep
 
 import time
 import tensorflow as tf
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
 
@@ -21,47 +23,76 @@ def mackey(n_iters):
 D = 4  # number of regressors
 T = 1  # delay
 N = 1000  # Number of points to generate
-mg_series = mackey(N)[499:]  # Use last 1500 points
-data = np.zeros((N - 500 - T - (D - 1) * T, D))
-lbls = np.zeros((N - 500 - T - (D - 1) * T,))
+frame = pd.read_csv('TimeSeries/Algn.csv')
+# mg_series = mackey(N)[499:]  # Use last 1500 points
+mg_series = frame['Adj Close'].values[499:1500]
+# frame = pd.read_csv('TimeSeries/Algn.csv')
+# series = frame['Adj Close'].values[:1000]
+#
+series= prep('TimeSeries/Algn.csv', D)
+series.creat_features()
+series.creat_target()
+#
+data_new = np.array(series.features)[499:1500]
+lbls_new = np.array(series.targets)[499:1500]
+
+# data = np.zeros((N - T - (D - 1) * T, D))
+# lbls = np.zeros((N - T - (D - 1) * T,))
 
 
-for t in range((D - 1) * T, N - 500 - T):
-    data[t - (D - 1) * T, :] = [mg_series[t - 3 * T], mg_series[t - 2 * T], mg_series[t - T], mg_series[t]]
-    lbls[t - (D - 1) * T] = mg_series[t + T]
-trnData = data[:lbls.size - round(lbls.size * 0.3), :]
-trnLbls = lbls[:lbls.size - round(lbls.size * 0.3)]
-chkData = data[lbls.size - round(lbls.size * 0.3):, :]
-chkLbls = lbls[lbls.size - round(lbls.size * 0.3):]
+
+# for t in range((D - 1) * T, N - T):
+#     data[t - (D - 1) * T, :] = [mg_series[t - 3 * T], mg_series[t - 2 * T], mg_series[t - T], mg_series[t]]
+#     lbls[t - (D - 1) * T] = mg_series[t + T]
+# trnData = data[:lbls.size - round(len(lbls) * 0.3), :]
+# trnLbls = lbls[:lbls.size - round(lbls.size * 0.3)]
+# chkData = data[lbls.size - round(lbls.size * 0.3):, :]
+# chkLbls = lbls[lbls.size - round(lbls.size * 0.3):]
+
+trnData_new = data_new[:lbls_new.size - round(len(lbls_new) * 0.3), :]
+trnLbls_new = lbls_new[:lbls_new.size - round(lbls_new.size * 0.3)]
+chkData_new = data_new[lbls_new.size - round(lbls_new.size * 0.3):, :]
+chkLbls_new = lbls_new[lbls_new.size - round(lbls_new.size * 0.3):]
 
 
-m = 16  # number of rules
-alpha = 0.01  # learning rate
+m = 20  # number of rules
+# m = 10
+alpha = 0.001  # learning rate
 
 fis = Fuzzyloopa(n_inputs=D, n_rules=m, learning_rate=alpha)
-
 # Training
-num_epochs = 100
-
+num_epochs = 20000
 # Initialize session to make computations on the Tensorflow graph
 with tf.Session() as sess:
     sess.run(fis.init_variables)
     trn_costs = []
     val_costs = []
+    before = 0
     time_start = time.time()
+    ai_ = []
+    ci_ = []
     for epoch in range(num_epochs):
-        trn_loss, trn_pred = fis.train(sess, trnData, trnLbls)
-        val_pred, val_loss = fis.make_prediction(sess, chkData, chkLbls)
+        trn_loss, trn_pred, ai_, ci_ = fis.train(sess, trnData_new, trnLbls_new)
         if epoch % 10 == 0:
-            print("Train cost after epoch %i: %f" % (epoch, trn_loss))
+            print("Train cost after epoch %i: \nhuber: %f" % (epoch, trn_loss))
+            mad = fis.MAD(trn_pred, trnLbls_new)
+            mape = fis.MAPE(trn_pred, trnLbls_new)
+            smape = fis.SMAPE(trn_pred, trnLbls_new)
+            print('mape: {}\nmad: {}\nsmape: {}\n'.format(mape, mad, smape))
         if epoch == num_epochs - 1:
-            time_end = time.time()
-            print("Elapsed time: %f" % (time_end - time_start))
-            print("Validation loss: %f" % val_loss)
+            print(ai_)
+            print(ci_)
+            fis.plot_rules(sess, 0)
+            # time_end = time.time()
+            # print("Elapsed time: %f" % (time_end - time_start))
+            # print("Validation loss: %f" % val_loss)
+            val_pred, val_loss = fis.make_prediction(sess, chkData_new, chkLbls_new)
             pred = np.vstack((np.expand_dims(trn_pred, 1), np.expand_dims(val_pred, 1)))
-            plt.figure(1)
+            # plt.figure(1)
+            # plt.plot(series.targets)
             plt.plot(mg_series)
-            plt.plot(pred)
-        trn_costs.append(trn_loss)
-        val_costs.append(val_loss)
+            plt.plot([x for x in range(700,1000)],val_pred)
+            plt.plot(trn_pred, color='green')
+    #     trn_costs.append(trn_loss)
+    #     val_costs.append(val_loss)
     plt.show()

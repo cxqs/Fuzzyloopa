@@ -5,7 +5,7 @@ import os
 
 
 def check_path(path:str):
-    path = os.path.abspath('../' + path)
+    path = os.path.abspath(path)
     if not path.endswith('.csv'):
         return False
     if not os.path.isfile(path):
@@ -15,9 +15,10 @@ def check_path(path:str):
 
 class Prepocessing():
 
-    def __init__(self, path:'str'):
+    def __init__(self, path:'str', num):
+        self.num = num
         if check_path(path):
-            self.frame = pd.read_csv(os.path.abspath('../' + path))
+            self.frame = pd.read_csv(path)
 
 
     def print_info(self):
@@ -28,22 +29,22 @@ class Prepocessing():
 
 
     def creat_target(self):
-        self.__targets = np.array(self.frame['Adj Close'].values[30:])
+        self.targets = np.array(self.frame['Adj Close'].values[self.num:])
 
 
     def creat_features(self):
         features = []
-        for i in range(len(self.frame['Adj Close'].values)-30):
-            features.append(self.frame['Adj Close'].values[i:i+30])
-        self.__features = features
+        for i in range(len(self.frame['Adj Close'].values)-self.num):
+            features.append(self.frame['Adj Close'].values[i:i+self.num])
+        self.features = np.array(features)
 
 
     def split(self):
         train_start = 0
-        train_end = int(np.floor(0.8 * len(self.__features)))
+        train_end = int(np.floor(0.8 * len(self.features)))
         test_start = train_end
-        test_end = len(self.__features)
-        return self.__features[np.arange(train_start, train_end), :]
+        test_end = len(self.features)
+        return self.features[np.arange(train_start, train_end), :]
 
     def plot_graph(self):
         plt.plot(self.frame['Adj Close'])
