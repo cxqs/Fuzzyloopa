@@ -15,9 +15,10 @@ def check_path(path:str):
 
 class Prepocessing():
 
-    def __init__(self, path:'str'):
+    def __init__(self, path:'str', num):
+        self.num = num
         if check_path(path):
-            self.frame = pd.read_csv(os.path.abspath(path))
+            self.frame = pd.read_csv(path)
 
 
     def print_info(self):
@@ -28,13 +29,13 @@ class Prepocessing():
 
 
     def creat_target(self):
-        self.targets = np.array(self.frame['Adj Close'].values[30:])
+        self.targets = np.array(self.frame['Adj Close'].values[self.num:])
 
 
     def creat_features(self):
         features = []
-        for i in range(len(self.frame['Adj Close'].values)-30):
-            features.append(self.frame['Adj Close'].values[i:i+30])
+        for i in range(len(self.frame['Adj Close'].values)-self.num):
+            features.append(self.frame['Adj Close'].values[i:i+self.num])
         self.features = np.array(features)
 
 

@@ -68,7 +68,8 @@ class Fuzzyloopa():
 
 
     def train(self, sess, x , targets):
-        out, l, _ = sess.run([self.out, self.loss, self.optimize], feed_dict={self.inputs: x, self.targets: targets})
+        ai_, ci_,out, l, _ = sess.run([self.ai, self.ci, self.out, self.loss, self.optimize], feed_dict={self.inputs: x, self.targets: targets})
+        input, output = sess.run([self.inputs,self.targets], feed_dict={self.inputs: x, self.targets: targets})
         # print(graph)
-        return l, out
+        return l, out, ai_, ci_
 
