@@ -1,10 +1,9 @@
 import tensorflow as tf
-from sklearn.utils import check_array
 from sklearn.metrics import mean_absolute_error
 import numpy as np
 import math
-from sklearn.model_selection import TimeSeriesSplit
 import matplotlib.pyplot as plt
+from pandas_datareader import data
 
 
 class Fuzzyloopa():
@@ -85,3 +84,11 @@ class Fuzzyloopa():
         # print(graph)
         return l, out, ai_, ci_
 
+tickers = ['AAPL', 'MSFT', '^GSPC']
+
+# We would like all available data from 01/01/2000 until 12/31/2016.
+start_date = '2010-01-01'
+end_date = '2016-12-31'
+
+# User pandas_reader.data.DataReader to load the desired data. As simple as that.
+panel_data = data.DataReader('INPX', 'google', start_date, end_date)
