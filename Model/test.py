@@ -1,5 +1,5 @@
 from Models import Fuzzyloopa
-from pre.Preprocessing import Prepocessing as prep
+from Preprocessing.Preprocessing import Prepocessing as prep
 
 import time
 import tensorflow as tf
@@ -20,10 +20,23 @@ def mackey(n_iters):
     return x
 
 
+# data = np.zeros((N - T - (D - 1) * T, D))
+# lbls = np.zeros((N - T - (D - 1) * T,))
+
+
+
+# for t in range((D - 1) * T, N - T):
+#     data[t - (D - 1) * T, :] = [mg_series[t - 3 * T], mg_series[t - 2 * T], mg_series[t - T], mg_series[t]]
+#     lbls[t - (D - 1) * T] = mg_series[t + T]
+# trnData = data[:lbls.size - round(len(lbls) * 0.3), :]
+# trnLbls = lbls[:lbls.size - round(lbls.size * 0.3)]
+# chkData = data[lbls.size - round(lbls.size * 0.3):, :]
+# chkLbls = lbls[lbls.size - round(lbls.size * 0.3):]
+
 D = 4  # number of regressors
 T = 1  # delay
 N = 1000  # Number of points to generate
-frame = pd.read_csv('TimeSeries/zuerich.csv')
+# frame = pd.read_csv('TimeSeries/zuerich.csv')
 # mg_series = mackey(N)[499:]  # Use last 1500 points
 # mg_series = frame["Zuerich"].values
 # frame = pd.read_csv('TimeSeries/Algn.csv')
@@ -37,18 +50,6 @@ series.creat_target()
 data_new = np.array(series.features)[500:1000]
 lbls_new = np.array(series.targets)[500:1000]
 
-# data = np.zeros((N - T - (D - 1) * T, D))
-# lbls = np.zeros((N - T - (D - 1) * T,))
-
-
-
-# for t in range((D - 1) * T, N - T):
-#     data[t - (D - 1) * T, :] = [mg_series[t - 3 * T], mg_series[t - 2 * T], mg_series[t - T], mg_series[t]]
-#     lbls[t - (D - 1) * T] = mg_series[t + T]
-# trnData = data[:lbls.size - round(len(lbls) * 0.3), :]
-# trnLbls = lbls[:lbls.size - round(lbls.size * 0.3)]
-# chkData = data[lbls.size - round(lbls.size * 0.3):, :]
-# chkLbls = lbls[lbls.size - round(lbls.size * 0.3):]
 
 trnData_new = data_new[:lbls_new.size - round(len(lbls_new) * 0.3), :]
 trnLbls_new = lbls_new[:lbls_new.size - round(lbls_new.size * 0.3)]
@@ -89,6 +90,7 @@ ci = [ 5.584588,    4.793802,    4.02952,   -4.06011,     0.1081356,  -0.925067,
   0.04192426,  1.4916527,  -1.3864969,   0.28438193, -1.007004,   -2.4688423,
  -0.22718635,  0.28712523, -0.36871764, -0.3263881,  -0.8420689,   0.42085102,
  -1.2117531,   0.45000574]
+
 fis = Fuzzyloopa(n_inputs=D, n_rules=m, learning_rate=alpha, ai=ai, ci=ci)
 # Training
 num_epochs = 5000
@@ -110,14 +112,12 @@ with tf.Session() as sess:
             smape = fis.SMAPE(trn_pred, trnLbls_new)
             print('mape: {}\nmad: {}\nsmape: {}\n'.format(mape, mad, smape))
         if epoch == num_epochs - 1:
-            # print(ai_)
-            # print(ci_)
             fis.plot_rules(sess, 0)
             val_pred, val_loss = fis.make_prediction(sess, chkData_new, chkLbls_new)
+            val_pred_ex, val_loss_ex = fis.make_prediction(sess, chkData_new[0:3], chkLbls_new[0:3])
             pred = np.vstack((np.expand_dims(trn_pred, 1), np.expand_dims(val_pred, 1)))
             print(val_loss)
-            # plt.plot([x for x in range(700,1000)],val_pred)
             plt.plot([x for x in range(0, lbls_new.size)], lbls_new, color='blue')
-            # plt.plot([x for x in range(lbls_new.size - round(len(lbls_new) * 0.3), lbls_new.size)], val_pred, color='yellow')
+            plt.plot([x for x in range(lbls_new.size - round(len(lbls_new) * 0.3), lbls_new.size)], val_pred, color='yellow')
             plt.plot([x for x in range(0,lbls_new.size - round(len(lbls_new) * 0.3))], trn_pred, color='green')
     plt.show()
