@@ -15,27 +15,29 @@ def check_path(path:str):
 
 class Prepocessing():
 
-    def __init__(self, path:'str', num):
+    def __init__(self, path:'str', num, column):
+        self.column = column
         self.num = num
         if check_path(path):
             self.frame = pd.read_csv(path)
+            self.data = self.frame[column]
 
 
     def print_info(self):
         print('---------------describe--------------------')
-        print(self.frame['Adj Close'].describe())
+        print(self.frame[self.column].describe())
         print('--------------null----------------------')
         print(self.frame.isnull().sum())
 
 
     def creat_target(self):
-        self.targets = np.array(self.frame['Adj Close'].values[self.num:])
+        self.targets = np.array(self.frame[self.column].values[self.num:])
 
 
     def creat_features(self):
         features = []
-        for i in range(len(self.frame['Adj Close'].values)-self.num):
-            features.append(self.frame['Adj Close'].values[i:i+self.num])
+        for i in range(len(self.frame[self.column].values)-self.num):
+            features.append(self.frame[self.column].values[i:i+self.num])
         self.features = np.array(features)
 
 
@@ -47,5 +49,5 @@ class Prepocessing():
         return self.features[np.arange(train_start, train_end), :]
 
     def plot_graph(self):
-        plt.plot(self.frame['Adj Close'])
+        plt.plot(self.frame[self.column])
         plt.show()
