@@ -30,6 +30,12 @@ class Prepocessing():
         print(self.frame.isnull().sum())
 
 
+    def normalize_features(self):
+        mean = self.features.mean()
+        std = self.features.std()
+        self.features = (self.features - mean) / std
+
+
     def creat_target(self):
         self.targets = np.array(self.frame[self.column].values[self.num:])
 

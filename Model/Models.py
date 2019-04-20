@@ -3,7 +3,43 @@ from sklearn.metrics import mean_absolute_error
 import numpy as np
 import math
 import matplotlib.pyplot as plt
-from pandas_datareader import data
+import csv
+import pandas as pd
+import gviz_api
+
+
+class CFuzzyloopa():
+
+    def __init__(self, n_inputs, n_rules, n_output, learning_rate = 1e-2, ai=None, ci=None):
+        self.__numO = n_output
+        self.__numI = n_inputs
+        self.__numR = n_rules
+        self.inputs = tf.placeholder(tf.float32, shape=(None, self.__numI))
+        self.targets = tf.placeholder(tf.float32, shape=None)
+        # numbers of ai varibles are numR * numI
+        if (ai == None and ci == None):
+            self.ai = tf.get_variable('ai', [self.__numR * self.__numI], initializer=tf.random_normal_initializer(0, 1))
+            self.ci = tf.get_variable('ci', [self.__numR * self.__numI], initializer=tf.random_normal_initializer(0, 1))
+        else:
+            # tf.convert_to_tensor(ai, dtype=tf.float32)
+            ai_init = tf.constant(ai)
+            ci_init = tf.constant(ci)
+            self.ai = tf.get_variable('ai', initializer=ai_init)
+            self.ci = tf.get_variable('ci', initializer=ci_init)
+        # this step is 2-3 layers
+        self.rules = tf.reduce_prod(
+            tf.reshape(tf.exp(-0.5 * tf.square(tf.subtract(tf.tile(self.inputs, (1, n_rules)), self.ai) / (self.ci))),
+                       (-1, n_rules, n_inputs)), axis=2)
+
+        y = tf.get_variable('y', [self.__numO, self.__numR], initializer=tf.random_normal_initializer(0,1))
+        num = tf.reduce_sum(tf.multiply(self.rules, y), axis=1)
+        den = tf.clip_by_value(tf.reduce_sum(self.rules, axis=1), 1e-12, 1e12)
+        self.out = tf.divide(num, den)
+
+        self.loss = tf.losses.huber_loss(self.targets, self.out)
+        # self.loss = tf.losses.mean_squared_error(self.targets, self.out)
+        self.optimize = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(self.loss)
+        self.init_variables = tf.global_variables_initializer()
 
 
 class Fuzzyloopa():
@@ -24,10 +60,6 @@ class Fuzzyloopa():
             self.ai = tf.get_variable('ai', initializer=ai_init)
             self.ci = tf.get_variable('ci', initializer=ci_init)
         # this step is 2-3 layers
-        self.lol2 = -0.5 * tf.square(tf.subtract(tf.tile(self.inputs, (1, n_rules)), self.ai))
-        self.lol1 = tf.exp(-0.5 * tf.square(tf.subtract(tf.tile(self.inputs, (1, n_rules)), self.ai) / (self.ci)))
-        self.lol = tf.reshape(tf.exp(-0.5 * tf.square(tf.subtract(tf.tile(self.inputs, (1, n_rules)), self.ai) / (self.ci))),
-                       (-1, n_rules, n_inputs))
         self.rules = tf.reduce_prod(
             tf.reshape(tf.exp(-0.5 * tf.square(tf.subtract(tf.tile(self.inputs, (1, n_rules)), self.ai) / (self.ci))),
                        (-1, n_rules, n_inputs)), axis=2)
@@ -80,15 +112,6 @@ class Fuzzyloopa():
     def train(self, sess, x , targets):
         ai_, ci_,out, l, _ = sess.run([self.ai, self.ci, self.out, self.loss, self.optimize], feed_dict={self.inputs: x, self.targets: targets})
         # input, output = sess.run([self.inputs,self.targets], feed_dict={self.inputs: x, self.targets: targets})
-        rule, rule1, rule2 = sess.run([self.lol,self.lol1, self.lol2], feed_dict={self.inputs: x, self.targets: targets})
+        rule = sess.run([self.rules], feed_dict={self.inputs: x, self.targets: targets})
         # print(graph)
         return l, out, ai_, ci_
-
-tickers = ['AAPL', 'MSFT', '^GSPC']
-
-# We would like all available data from 01/01/2000 until 12/31/2016.
-start_date = '2010-01-01'
-end_date = '2016-12-31'
-
-# User pandas_reader.data.DataReader to load the desired data. As simple as that.
-panel_data = data.DataReader('INPX', 'google', start_date, end_date)
