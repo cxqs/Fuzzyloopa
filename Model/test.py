@@ -1,4 +1,4 @@
-from Models import Fuzzyloopa
+from Models import Fuzzyloopa, CFuzzyloopa
 from Preprocessing.Preprocessing import Prepocessing as prep
 
 import time
@@ -35,14 +35,14 @@ def mackey(n_iters):
 
 D = 10  # number of regressors
 T = 1  # delay
-N = 1000  # Number of points to generate
+# N = 1000  # Number of points to generate
 # frame = pd.read_csv('TimeSeries/zuerich.csv')
 # mg_series = mackey(N)[499:]  # Use last 1500 points
 # mg_series = frame["Zuerich"].values
 # frame = pd.read_csv('TimeSeries/Algn.csv')
 # series = frame['Adj Close'].values[:1000]
 
-series= prep('TimeSeries/Algn.csv', D, "Adj Close")
+series= prep('TimeSeries/Algn.csv', D, 1, "Adj Close")
 series.print_info()
 series.creat_features()
 series.normalize_features()
@@ -61,32 +61,34 @@ m = 25  # number of rules
 # m = 10
 alpha = 0.01  # learning rate
 
-fis = Fuzzyloopa(n_inputs=D, n_rules=m, learning_rate=alpha)
+# cfis = Fuzzyloopa(n_inputs=D, n_rules=m, learning_rate=alpha)
+cfis = CFuzzyloopa(n_inputs=D, n_rules=m, n_output=1, learning_rate=alpha)
 # Training
 num_epochs = 5000
 # Initialize session to make computations on the Tensorflow graph
 with tf.Session() as sess:
-    sess.run(fis.init_variables)
+    sess.run(cfis.init_variables)
     trn_costs = []
     val_costs = []
     before = 0
     ai_ = []
     ci_ = []
     for epoch in range(num_epochs):
-        trn_loss, trn_pred, ai_, ci_ = fis.train(sess, trnData_new, trnLbls_new)
+        trn_loss, trn_pred, ai_, ci_ = cfis.train(sess, trnData_new, trnLbls_new)
+        # ctrn_loss, ctrn_pred, cai_, cci_ = cfis.train(sess, trnData_new, trnLbls_new)
         if epoch % 10 == 0:
             print("Train cost after epoch %i: \nhuber: %f" % (epoch, trn_loss))
-            mad = fis.MAD(trn_pred, trnLbls_new)
-            mape = fis.MAPE(trn_pred, trnLbls_new)
-            smape = fis.SMAPE(trn_pred, trnLbls_new)
+            mad = cfis.MAD(trn_pred, trnLbls_new)
+            mape = cfis.MAPE(trn_pred, trnLbls_new)
+            smape = cfis.SMAPE(trn_pred, trnLbls_new)
             print('mape: {}\nmad: {}\nsmape: {}\n'.format(mape, mad, smape))
         if epoch == num_epochs - 1:
-            fis.plot_rules(sess, 2)
-            val_pred, val_loss = fis.make_prediction(sess, chkData_new, chkLbls_new)
-            val_pred_ex, val_loss_ex = fis.make_prediction(sess, chkData_new[0:3], chkLbls_new[0:3])
+            # cfis.plot_rules(sess, 2)
+            val_pred, val_loss = cfis.make_prediction(sess, chkData_new, chkLbls_new)
+            val_pred_ex, val_loss_ex = cfis.make_prediction(sess, chkData_new[0:3], chkLbls_new[0:3])
             # pred = np.vstack((np.expand_dims(trn_pred, 1), np.expand_dims(val_pred, 1)))
             print(val_loss)
-            plt.plot([x for x in range(0, lbls_new.size)], lbls_new, color='blue')
-            plt.plot([x for x in range(lbls_new.size - round(len(lbls_new) * 0.3), lbls_new.size)], val_pred, color='yellow')
-            plt.plot([x for x in range(0,lbls_new.size - round(len(lbls_new) * 0.3))], trn_pred, color='green')
+            # plt.plot([x for x in range(0, lbls_new.size)], lbls_new, color='blue')
+            # plt.plot([x for x in range(lbls_new.size - round(len(lbls_new) * 0.3), lbls_new.size)], val_pred, color='yellow')
+            # plt.plot([x for x in range(0,lbls_new.size - round(len(lbls_new) * 0.3))], trn_pred, color='green')
     plt.show()

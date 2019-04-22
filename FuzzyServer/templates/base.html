@@ -4,77 +4,114 @@
   <meta charset="utf-8" />
   <title>{{ title }}</title>
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/base.css') }}">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js'></script>
 </head>
 
 <body>
-  <left>
-    <h1>{{ title }}</h1>
-
-    <canvas id="chart" width="800" height="450"></canvas>
-    <script>
-      // bar chart data
-      var barData = {
-        labels : [
-          {% for item in labels %}
-           "{{ item }}",
-           {% endfor %}
-        ],
-        datasets : [{
-          fillColor: "rgba(151,187,205,0.2)",
-          strokeColor: "rgba(151,187,205,1)",
-          pointColor: "rgba(151,187,205,1)",
-          pointStrokeColor: "#fff",
-          pointHighlightFill: "#fff",
-          pointHighlightStroke: "rgba(151,187,205,1)",
-          bezierCurve : false,
-          data : [
-	    {% for item in values %}
-              {{ item }},
-            {% endfor %}]
-          }
-	]
-      }
-      Chart.defaults.global.animationSteps = 50;
-      Chart.defaults.global.tooltipYPadding = 16;
-      Chart.defaults.global.tooltipCornerRadius = 0;
-      Chart.defaults.global.tooltipTitleFontStyle = "normal";
-      Chart.defaults.global.tooltipFillColor = "rgba(0,0,0,0.8)";
-      Chart.defaults.global.animationEasing = "easeOutBounce";
-      Chart.defaults.global.responsive = false;
-      Chart.defaults.global.scaleLineColor = "black";
-      Chart.defaults.global.scaleFontSize = 16;
-      // get bar chart canvas
-      var mychart = document.getElementById("chart").getContext("2d");
-      steps = 10
-      max = {{ max }}
-      // draw bar chart
-      var LineChartDemo = new Chart(mychart).Line(barData, {
-        scaleOverride: true,
-        scaleSteps: steps,
-        scaleStepWidth: Math.ceil(max / steps),
-        scaleStartValue: 0,
-        scaleShowVerticalLines: true,
-        scaleShowGridLines : true,
-        barShowStroke : true,
-        scaleShowLabels: true,
-        bezierCurve: false,
-      });
-    </script>
-  </left>
-
-  <div class="field1">
-    <form action="/predict/" method="post">
-    <input type="hidden" name="index" value="1">
-    <input type="submit" class="btn btn-dark" value="Align">
-    </form>
+  <div class="row">
+    <div class="col">
+      <div class="well1"><h1 style="color: rgb(234,241,245)";>Fuzzyloopa</h1></div>
+    </div>
   </div>
-
-  <div class="field2">
-    <form action="/predict/" method="post">
-    <input type="hidden" name="index" value="2">
-    <input type="submit" class="btn btn-dark" value="McCley">
-    </form>
+  <div class="row">
+    <div class="col-md-8">
+        <div class="well">
+            <canvas id="chart" width="800" height="450"></canvas>
+              <script>
+                // bar chart data
+                var barData = {
+                  labels : [
+                    {% for item in labels %}
+                     "{{ item }}",
+                     {% endfor %}
+                  ],
+                  datasets : [{
+                    fillColor: "rgba(151,187,205,0.2)",
+                    strokeColor: "rgba(151,187,205,1)",
+                    pointColor: "rgba(151,187,205,1)",
+                    pointStrokeColor: "#fff",
+                    pointHighlightFill: "#fff",
+                    pointHighlightStroke: "rgba(151,187,205,1)",
+                    bezierCurve : false,
+                    data : [
+                  {% for item in values %}
+                        {{ item }},
+                      {% endfor %}]
+                    }
+                  ]
+                }
+                Chart.defaults.global.animationSteps = 50;
+                Chart.defaults.global.tooltipYPadding = 16;
+                Chart.defaults.global.tooltipCornerRadius = 0;
+                Chart.defaults.global.tooltipTitleFontStyle = "normal";
+                Chart.defaults.global.tooltipFillColor = "rgba(0,0,0,0.8)";
+                Chart.defaults.global.animationEasing = "easeOutBounce";
+                Chart.defaults.global.responsive = false;
+                Chart.defaults.global.scaleLineColor = "black";
+                Chart.defaults.global.scaleFontSize = 16;
+                // get bar chart canvas
+                var mychart = document.getElementById("chart").getContext("2d");
+                steps = 10
+                max = {{ max }}
+                // draw bar chart
+                var LineChartDemo = new Chart(mychart).Line(barData, {
+                  scaleOverride: true,
+                  scaleSteps: steps,
+                  scaleStepWidth: Math.ceil(max / steps),
+                  scaleStartValue: 0,
+                  scaleShowVerticalLines: true,
+                  scaleShowGridLines : true,
+                  barShowStroke : true,
+                  scaleShowLabels: true,
+                  bezierCurve: false,
+                });
+              </script>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="row">
+          <div class="col-md-6"></br> </div>
+          <div class="col-md-6"></br> </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+              <form action="/predict/" method="post">
+                <input type="hidden" name="index" value="1">
+                <input type="submit" class="btn btn-primary btn-md" value="Align">
+              </form>
+            </div>
+            <div class="col-md-6">
+                <div class="well"></br> </div>
+            </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6"></br> </div>
+          <div class="col-md-6"></br> </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+              <form action="/predict/" method="post">
+                <input type="hidden" name="index" value="2">
+                <input type="submit" class="btn btn-primary btn-md" value="McCensi">
+              </form>
+            </div>
+            <div class="col-md-6">
+                <div class="well"></br> </div>
+            </div>
+        </div>
+    </div>
   </div>
+  <!--<div class="row">-->
+      <!--<div class="col-md-4">-->
+          <!--<div class="well">6</div>-->
+      <!--</div>-->
+      <!--<div class="col-md-4">-->
+          <!--<div class="well">7</div>-->
+      <!--</div>-->
+      <!--<div class="col-md-4">-->
+          <!--<div class="well">8</div>-->
+      <!--</div>-->
+  <!--</div>-->
 </body>
 </html>
