@@ -15,7 +15,8 @@ def check_path(path:str):
 
 class Prepocessing():
 
-    def __init__(self, path:'str', num, column):
+    def __init__(self, path:'str', num, output, column):
+        self.output = output
         self.column = column
         self.num = num
         if check_path(path):
@@ -30,13 +31,24 @@ class Prepocessing():
         print(self.frame.isnull().sum())
 
 
+    def normalize_features(self):
+        mean = self.features.mean()
+        std = self.features.std()
+        self.features = (self.features - mean) / std
+
+
     def creat_target(self):
-        self.targets = np.array(self.frame[self.column].values[self.num:])
+        targets = []
+        for i in range(self.num, len(self.frame[self.column].values)-self.output):
+            targets.append(self.frame[self.column].values[i:i+self.output])
+            # features.append(self.frame[self.column].values[i:i+self.num])
+        self.targets = np.array(targets)
+        # self.targets = np.array(self.frame[self.column].values[self.num:])
 
 
     def creat_features(self):
         features = []
-        for i in range(len(self.frame[self.column].values)-self.num):
+        for i in range(len(self.frame[self.column].values)-self.num - self.output):
             features.append(self.frame[self.column].values[i:i+self.num])
         self.features = np.array(features)
 
