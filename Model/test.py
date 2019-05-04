@@ -1,10 +1,9 @@
-from Models import Fuzzyloopa, CFuzzyloopa
+from Model.Models import Fuzzyloopa, CFuzzyloopa
 from Preprocessing.Preprocessing import Prepocessing as prep
 
-import time
 import tensorflow as tf
 import numpy as np
-import pandas as pd
+import json
 import matplotlib.pyplot as plt
 
 
@@ -42,7 +41,7 @@ T = 1  # delay
 # frame = pd.read_csv('TimeSeries/Algn.csv')
 # series = frame['Adj Close'].values[:1000]
 
-series= prep('TimeSeries/zuerich.csv', D, 1, "Zuerich")
+series= prep('TimeSeries/Algn.csv', D, 1, 'Adj Close')
 series.print_info()
 series.creat_features()
 series.normalize_features()
@@ -66,7 +65,7 @@ batch_size = 700
 # cfis = Fuzzyloopa(n_inputs=D, n_rules=m, learning_rate=alpha)
 cfis = CFuzzyloopa(n_inputs=D, n_rules=m, n_output=1, learning_rate=alpha)
 # Training
-num_epochs = 20000
+num_epochs = 10000
 # Initialize session to make computations on the Tensorflow graph
 with tf.Session() as sess:
     sess.run(cfis.init_variables)
@@ -75,10 +74,11 @@ with tf.Session() as sess:
     before = 0
     ai_ = []
     ci_ = []
+    y_ = []
     trn_loss, trn_pred = None, None
     for epoch in range(num_epochs):
         for i in range(0,len(trnData_new),batch_size):
-            trn_loss, trn_pred, ai_, ci_ = cfis.train(sess, trnData_new[i:i+batch_size], trnLbls_new[i:i+batch_size])
+            trn_loss, trn_pred, ai_, ci_, y_ = cfis.train(sess, trnData_new[i:i+batch_size], trnLbls_new[i:i+batch_size])
         trn_pred, trn_loss = cfis.make_prediction(sess, trnData_new, trnLbls_new)
         if epoch % 10 == 0:
             print("Train cost after epoch %i: \nhuber: %f" % (epoch, trn_loss))
@@ -89,6 +89,15 @@ with tf.Session() as sess:
             # ctrn_loss, ctrn_pred, cai_, cci_ = cfis.train(sess, trnData_new, trnLbls_new)
         if epoch == num_epochs - 1:
             # cfis.plot_rules(sess, 2)
+            # print(ai_)
+            # print(ci_)
+            # print(y)
+            json_dict = {}
+            json_dict['ai'] = ai_.tolist()
+            json_dict['ci'] = ci_.tolist()
+            json_dict['y'] = y_.tolist()
+            with open('Weights/Algn_22_1.txt', 'w', encoding='utf-8') as f:
+                f.write(json.dumps(json_dict))
             val_pred, val_loss = cfis.make_prediction(sess, chkData_new, chkLbls_new)
             val_pred_ex, val_loss_ex = cfis.make_prediction(sess, chkData_new[0:3], chkLbls_new[0:3])
             # pred = np.vstack((np.expand_dims(trn_pred, 1), np.expand_dims(val_pred, 1)))

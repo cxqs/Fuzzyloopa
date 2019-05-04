@@ -10,7 +10,7 @@ import gviz_api
 
 class CFuzzyloopa():
 
-    def __init__(self, n_inputs, n_rules, n_output, learning_rate = 1e-2, ai=None, ci=None):
+    def __init__(self, n_inputs, n_rules, n_output, learning_rate = 1e-2, ai=None, ci=None, y=None):
         self.__numI = n_inputs
         self.__numR = n_rules
         self.__numO = n_output
@@ -32,12 +32,16 @@ class CFuzzyloopa():
                 tf.exp(-0.5 * tf.square(tf.subtract(tf.tile(self.inputs, (1, self.__numR)), self.ai) / (self.ci))),
                 (-1, self.__numR, self.__numI)), axis=2)
         print(str(self.rules.shape[0]))
-        self.y = tf.get_variable('y', [self.__numO, self.__numR], initializer=tf.random_normal_initializer(0, 1))
-        self.y = tf.tile(self.y, [1, tf.shape(self.rules)[0]])
+        if y == None:
+            self.y = tf.get_variable('y', [self.__numO, self.__numR], initializer=tf.random_normal_initializer(0, 1))
+        else:
+            y_init = tf.constant(y)
+            self.y = tf.get_variable('y', initializer=y_init)
+        self.y_bigger = tf.tile(self.y, [1, tf.shape(self.rules)[0]])
         self.helper = tf.reshape(tf.tile(tf.reshape(self.rules, [tf.shape(self.rules)[0] * tf.shape(self.rules)[1]]),
                                          [self.__numO]), [self.__numO, tf.shape(self.rules)[0] * tf.shape(self.rules)[1]])
 
-        self.mul = tf.multiply(self.helper, self.y)
+        self.mul = tf.multiply(self.helper, self.y_bigger)
         self.back_to_matrix = tf.reduce_sum(tf.reshape(self.mul, [self.__numO, tf.shape(self.rules)[0], self.__numR]), axis=2)
         # self.num = tf.reduce_sum(tf.multiply(self.rules, self.y), axis=1)
         self.den = tf.reshape(tf.clip_by_value(tf.reduce_sum(self.rules, axis=1), 1e-12, 1e12), [1,tf.shape(self.rules)[0]])
@@ -68,10 +72,8 @@ class CFuzzyloopa():
     def train(self, sess, x , targets):
         # y, y1 = sess.run([self.y, self.y1])
         rule, helper, mul, back, den = sess.run([self.rules, self.helper, self.mul, self.back_to_matrix, self.den], feed_dict={self.inputs: x, self.targets: targets})
-        ai_, ci_,out, l, _ = sess.run([self.ai, self.ci, self.out, self.loss, self.optimize], feed_dict={self.inputs: x, self.targets: targets})
-        # input, output = sess.run([self.inputs,self.targets], feed_dict={self.inputs: x, self.targets: targets})
-        # print(graph)
-        return l, out, ai_, ci_
+        y, ai_, ci_,out, l, _ = sess.run([self.y, self.ai, self.ci, self.out, self.loss, self.optimize], feed_dict={self.inputs: x, self.targets: targets})
+        return l, out, ai_, ci_, y
 
 
 class Fuzzyloopa():
@@ -145,51 +147,3 @@ class Fuzzyloopa():
         ai_, ci_,out, l, num, rule, _ = sess.run([self.ai, self.ci, self.out, self.loss, self.num, self.rules, self.optimize], feed_dict={self.inputs: x, self.targets: targets})
         # input, output = sess.run([self.inputs,self.targets], feed_dict={self.inputs: x, self.targets: targets})
         return l, out, ai_, ci_
-
-
-# data=[[1.0,2.0,4.0,5.0],[0.0,6.0,7.0,8.0],[8.0,1.0,1.0,1.0]]
-# multiply = tf.constant([2,1])
-# data2 = tf.tile(data, multiply)
-# data1=[[8.0,1.0,1.0,1.0], [8.0,1.0,1.0,1.0]]
-# data3 = tf.reshape(data2, [-1, 3, 4])
-# # X=tf.constant(data3)
-# X = data3
-# Y=tf.constant(data1)
-# matResult=tf.matmul(X, X, transpose_b=True)
-#
-# multiplyResult=tf.reduce_sum(tf.multiply(X,X),axis=1)
-# multi = tf.multiply(X,Y)
-# with tf.Session() as sess:
-#    print('matResult')
-#    print(sess.run(data3))
-#    print()
-#    print(multi)
-#    print(sess.run([multi]))
-#    print()
-
-data=[[[1.0, 2.0, 4.0, 5.0],[0.0, 6.0, 7.0, 8.0],[8.0, 1.0, 1.0, 1.0]]]
-data1=[[1.0, 2.0, 4.0, 5.0]]
-x = tf.constant(data)
-y = tf.constant(data1)
-# y = tf.tile(y, [1, x.shape[0]])
-l = tf.divide(x,y)
-# x = tf.reshape(tf.tile(tf.reshape(x, [x.shape[0]*x.shape[1]]), [2]),[2, x.shape[0]*x.shape[1]])
-# p = tf.reshape(x, [2,3,4])
-# w = tf.constant([[0.0, 1.0, 2.0, 3.0, 4.0, 5.0]])
-# xw = tf.multiply(x, y)
-# p = tf.reshape(xw, [2,3,4])
-# max_in_rows = tf.reduce_max(xw, 1)
-
-sess = tf.Session()
-print(sess.run(x))
-print(sess.run(l))
-print("gogogo")
-print(sess.run(y))
-# ==> [[0.0, 5.0, 10.0, 15.0, 20.0, 25.0],
-#      [0.0, 5.0, 10.0, 15.0, 20.0, 25.0],
-#      [0.0, 5.0, 10.0, 15.0, 20.0, 25.0],
-#      [0.0, 5.0, 10.0, 15.0, 20.0, 25.0],
-#      [0.0, 5.0, 10.0, 15.0, 20.0, 25.0]]
-
-# print(sess.run(max_in_rows))
-# ==> [25.0, 25.0, 25.0, 25.0, 25.0]
