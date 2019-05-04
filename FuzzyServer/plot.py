@@ -59,26 +59,36 @@ def line(line = 'Bitcoin Monthly Price in USD'):
 
 @app.route('/predict_align/', methods=['POST'])
 def do_align():
-
     series = prep('../TimeSeries/Algn.csv', D, 1, "Adj Close")
     series.creat_features()
     series.normalize_features()
     series.creat_target()
 
-    lbl = []
-    for i in series.targets[:1000]:
-        lbl.append(i[0])
-    lbls_new = lbl
+    data = np.array(series.features)[:2800]
+    lbls = np.array(series.targets)[:2800]
 
-    labels = [i for i in range(len(lbls_new[:1000]))]
-    values = lbls_new[:1000]
+    cfis = CFuzzyloopa(n_inputs=D, n_rules=m, n_output=1, learning_rate=ALPHA, ai=ai_algn, ci=ci_algn, y=y_algn)
 
-    line_labels = labels
-    line_values = values
-    index = request.form['index']
-    print(index)
-    return render_template('base.html', labels=line_labels, values=line_values)
+    with tf.Session() as sess:
+        sess.run(cfis.init_variables)
 
+        chkData_new = data[lbls.size - round(lbls.size * 0.3):, :]
+        chkLbls_new = lbls[lbls.size - round(lbls.size * 0.3):]
+
+        all_data = []
+        for ch in lbls:
+            all_data.append(ch[0])
+
+        val_pred, val_loss = cfis.make_prediction(sess, chkData_new, chkLbls_new)
+        prediction = [-1 for i in range(len(all_data) - len(val_pred))]
+        for ch in val_pred:
+            prediction.append(ch[0])
+
+        labels = [i for i in range(2800)]
+        line_labels = labels
+        line_values = all_data
+
+    return render_template('base.html', labels=line_labels, values=line_values, predic=prediction)
 
 @app.route('/predict_McCensi/', methods=['POST'])
 def doit():

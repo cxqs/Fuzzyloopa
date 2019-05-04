@@ -40,24 +40,26 @@
               data:{
                 labels: label_data,
                 datasets:[
-                  {
+                    {
                   label:'Predicted',
                   data: predict,
-                  backgroundColor:'green',
-                  borderWidth:1,
+                  backgroundColor:'#05b300',
                   fill: false,
                   borderColor:'#05b300',
-                  hoverBorderWidth:25,
-                  hoverBorderColor:'#05cf00',
+                  pointBackgroundColor: '#3bf030',
+                  hoverBorderColor:'#05b300',
                   pointRadius: 0,
-                }, {
+                  borderWidth: 2
+                    },
+                {
                   label:'Align',
                   data: data_all,
                   backgroundColor:'blue',
+                  pointBackgroundColor: '#33a3f0',
                   borderColor:'#0200f0',
-                  hoverBorderWidth:10,
                   fill: false,
-                  pointRadius: 0
+                  pointRadius: 0,
+                  borderWidth: 3
                 }
                 ]
               },
