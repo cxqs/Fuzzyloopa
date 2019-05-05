@@ -22,6 +22,7 @@
           </div>
           <script>
             let myChart = document.getElementById('myChart').getContext('2d');
+            var label_name1 = "{{label_name|safe}}";
             var predict = {{predic|safe}};
             var data_all = {{values|safe}};
             var label_data = {{labels|safe}};
@@ -52,7 +53,7 @@
                   borderWidth: 1
                     },
                 {
-                  label:'Align',
+                  label:label_name1,
                   data: data_all,
                   backgroundColor:'blue',
                   pointBackgroundColor: '#33a3f0',
@@ -67,7 +68,7 @@
                 responsive: true,
                 title:{
                   display:true,
-                  text:'Largest Cities In Massachusetts',
+                  text:'Result of ANFIS work',
                   fontSize:25,
                   fontColor: '#0099cc'
                 },
@@ -127,7 +128,7 @@
             <div class="col-md-12">
               <form action="/predict_Zuerich/" method="post">
                 <input type="hidden" name="index" value="2">
-                <input type="submit" class="btn btn-primary btn-md" value="McCensi">
+                <input type="submit" class="btn btn-primary btn-md" value="Zuerich">
               </form>
             </div>
         </div>

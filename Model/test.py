@@ -33,7 +33,7 @@ batch_size = 700
 # cfis = Fuzzyloopa(n_inputs=D, n_rules=m, learning_rate=alpha)
 cfis = CFuzzyloopa(n_inputs=D, n_rules=m, n_output=T, learning_rate=alpha)
 # Training
-num_epochs = 40000
+num_epochs = 80000
 # Initialize session to make computations on the Tensorflow graph
 with tf.Session() as sess:
     sess.run(cfis.init_variables)
@@ -60,7 +60,7 @@ with tf.Session() as sess:
             json_dict['ai'] = ai_.tolist()
             json_dict['ci'] = ci_.tolist()
             json_dict['y'] = y_.tolist()
-            with open('Weights/Zuerich_22_1_15.txt', 'w', encoding='utf-8') as f:
+            with open('Weights/Zuerich_22_1_15_2.txt', 'w', encoding='utf-8') as f:
                 f.write(json.dumps(json_dict))
             val_pred, val_loss = cfis.make_prediction(sess, chkData_new, chkLbls_new)
             val_pred_ex, val_loss_ex = cfis.make_prediction(sess, chkData_new[0:3], chkLbls_new[0:3])

@@ -55,7 +55,7 @@ def line(line = 'Bitcoin Monthly Price in USD'):
         line_labels = labels
         line_values = all_data
 
-    return render_template('base.html', labels=line_labels, values=line_values, predic=prediction)
+    return render_template('base.html', labels=line_labels, values=line_values, predic=prediction,label_name="Align")
 
 
 @app.route('/predict_align/', methods=['POST'])
@@ -89,12 +89,12 @@ def do_align():
         line_labels = labels
         line_values = all_data
 
-    return render_template('base.html', labels=line_labels, values=line_values, predic=prediction)
+    return render_template('base.html', labels=line_labels, values=line_values, predic=prediction,label_name='Align')
 
 @app.route('/predict_Zuerich/', methods=['POST'])
 def doit():
 
-    with open('../Weights/Zuerich_22_1_15.txt') as json_file:
+    with open('../Weights/Zuerich_22_1_15_2.txt') as json_file:
         data = json.load(json_file)
         ai_Zuerich = data['ai']
         ci_Zuerich = data['ci']
@@ -129,7 +129,7 @@ def doit():
         line_labels = labels
         line_values = all_data
 
-    return render_template('base.html', labels=line_labels, values=line_values, predic=prediction)
+    return render_template('base.html', labels=line_labels, values=line_values, predic=prediction,label_name='Zuerich')
 
 if __name__ == '__main__':
     app.run()
