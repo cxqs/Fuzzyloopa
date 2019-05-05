@@ -1,1 +1,1 @@
-web: FuzzyServer.gunicorn plot:app
+web: gunicorn FuzzyServer.plot:app
