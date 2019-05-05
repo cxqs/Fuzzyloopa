@@ -1,0 +1,1 @@
+web: FuzzyServer.gunicorn plot:app
