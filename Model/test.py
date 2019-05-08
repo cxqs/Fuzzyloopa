@@ -1,22 +1,35 @@
 from Model.Models import Fuzzyloopa, CFuzzyloopa
 from Preprocessing.Preprocessing import Prepocessing as prep
-
 import tensorflow as tf
 import numpy as np
-import json
 import matplotlib.pyplot as plt
+import json
 
-D = 15  # number of regressors
-T = 1  # delay
 
-series= prep('TimeSeries/zuerich.csv', D, T, 'Zuerich')
+def read_weights(path):
+    with open(path) as json_file:
+        data = json.load(json_file)
+        ai_algn = data['ai']
+        ci_algn = data['ci']
+        y_algn = data['y']
+    return ai_algn, ci_algn, y_algn
+
+
+D = 7  # number of regressors
+T = 5  # delay
+
+PATH_DATA = 'TimeSeries/Mackey.csv'
+NAME_COL = 'mackey'
+PATH_WEIGHT = 'Weights/Mackey_22_5_7.txt'
+
+series = prep(PATH_DATA, D, T, NAME_COL)
 series.print_info()
 series.creat_features()
 series.normalize_features()
 series.creat_target()
 
-data_new = np.array(series.features)[:2800]
-lbls_new = np.array(series.targets)[:2800]
+data_new = np.array(series.features)[:]
+lbls_new = np.array(series.targets)[:]
 
 trnData_new = data_new[:len(lbls_new) - round(len(lbls_new) * 0.3), :]
 trnLbls_new = lbls_new[:len(lbls_new) - round(len(lbls_new) * 0.3)]
@@ -28,22 +41,22 @@ chkLbls_new = lbls_new[len(lbls_new) - round(len(lbls_new) * 0.3):]
 m = 22
 alpha = 0.001  # learning rate
 # batch_size = 700 best for
-batch_size = 700
+batch_size = 10
 
-# cfis = Fuzzyloopa(n_inputs=D, n_rules=m, learning_rate=alpha)
+
+trnData_new = data_new[0:1000, :]
+trnLbls_new = lbls_new[0:1000,:]
+
+chkData_new = data_new[2500:2501, :]
+chkLbls_new = lbls_new[2500:2501, :]
+
+# ai, ci ,y = read_weights('Weights/Algn_22_1_7.txt')
 cfis = CFuzzyloopa(n_inputs=D, n_rules=m, n_output=T, learning_rate=alpha)
 # Training
-num_epochs = 80000
+num_epochs = 100
 # Initialize session to make computations on the Tensorflow graph
 with tf.Session() as sess:
     sess.run(cfis.init_variables)
-    trn_costs = []
-    val_costs = []
-    before = 0
-    ai_ = []
-    ci_ = []
-    y_ = []
-    trn_loss, trn_pred = None, None
     for epoch in range(num_epochs):
         for i in range(0,len(trnData_new),batch_size):
             trn_loss, trn_pred, ai_, ci_, y_ = cfis.train(sess, trnData_new[i:i+batch_size], trnLbls_new[i:i+batch_size])
@@ -54,22 +67,13 @@ with tf.Session() as sess:
             mape = cfis.MAPE(trn_pred, trnLbls_new)
             smape = cfis.SMAPE(trn_pred, trnLbls_new)
             print('mape: {}\nmad: {}\nsmape: {}\n'.format(mape, mad, smape))
-            # ctrn_loss, ctrn_pred, cai_, cci_ = cfis.train(sess, trnData_new, trnLbls_new)
         if epoch == num_epochs - 1:
-            json_dict = {}
-            json_dict['ai'] = ai_.tolist()
-            json_dict['ci'] = ci_.tolist()
-            json_dict['y'] = y_.tolist()
-            with open('Weights/Zuerich_22_1_15_2.txt', 'w', encoding='utf-8') as f:
-                f.write(json.dumps(json_dict))
-            val_pred, val_loss = cfis.make_prediction(sess, chkData_new, chkLbls_new)
-            val_pred_ex, val_loss_ex = cfis.make_prediction(sess, chkData_new[0:3], chkLbls_new[0:3])
-            print(val_loss)
-            # res = np.reshape(trn_pred,[1,-1])
-            # res1 = np.reshape(trnData_new, [1, -1])
-            # plt.plot(list(res[0]))
-            # plt.plot(list(res1[0]))
-            plt.plot([x for x in range(0, len(lbls_new))], lbls_new, color='blue')
-            plt.plot([x for x in range(len(lbls_new) - round(len(lbls_new) * 0.3), len(lbls_new))], val_pred, color='yellow')
-            plt.plot([x for x in range(0,lbls_new.size - round(len(lbls_new) * 0.3))], trn_pred, color='green')
+            cfis.save_weights(PATH_WEIGHT, sess)
+            lbls_new1 = series.creat_target(t=1)
+            val_pred = cfis.make_prediction(sess, chkData_new)
+            plt.plot([x for x in range(2300, len(lbls_new1[:2505]))], lbls_new[2300:2505], color='blue')
+            # plt.plot([x for x in range(len(lbls_new) - round(len(lbls_new) * 0.3), len(lbls_new) - round(len(lbls_new) * 0.3) + T)], val_pred[0], color= 'yellow')
+            # plt.plot([x for x in range(len(lbls_new) - round(len(lbls_new) * 0.3), len(lbls_new))], val_pred, color='yellow')
+            plt.plot([x for x in range(2500 ,2505)], val_pred[0], color='red')
+            # plt.plot([x for x in range(0,lbls_new.size - round(len(lbls_new) * 0.3))], trn_pred, color='green')
     plt.show()

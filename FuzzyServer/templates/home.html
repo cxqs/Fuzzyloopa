@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Fuzzyloop</title>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/homecss.css') }}">
+        <script src="{{url_for('static', filename='js/home.js.js')}}"></script>
+        <script class="jsbin" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+    </head>
+    <body>
+        <div class="file-upload">
+          <div class="image-upload-wrap">
+
+          <div class="Owndata">
+              <form action="/Plot/" method="post">
+                <input type="hidden" name="index" value="1">
+                <input type="submit" class="btn btn-primary btn-md" value="Use upload data">
+              </form>
+          </div>
+          <div class="Datafromserv">
+              <form action="/predict_align/" method="post">
+                <input type="hidden" name="index" value="1">
+                <input type="submit" class="btn btn-primary btn-md" value="Use data from server">
+              </form>
+          </div>
+              <form action="/predict_align/" method="post">
+
+              </form>
+              <input class="file-upload-input" type="file" name="archive" accept="multipart/x-zip" value="1">
+              <div class="drag-text">
+                <h3>
+                    load zip or drag it here
+                </h3>
+              </div>
+          </div>
+        </div>
+    </body>
+</html>

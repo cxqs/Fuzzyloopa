@@ -3,10 +3,7 @@ from sklearn.metrics import mean_absolute_error
 import numpy as np
 import math
 import matplotlib.pyplot as plt
-import csv
-import pandas as pd
-import gviz_api
-
+import json
 
 class CFuzzyloopa():
 
@@ -66,14 +63,28 @@ class CFuzzyloopa():
         return 100 / len(targets) * np.sum(2 * np.abs(out - targets) / (np.abs(targets) + np.abs(out)))
 
 
-    def make_prediction(self, sess, x, targets):
-        return sess.run([self.out, self.loss], feed_dict={self.inputs: x, self.targets: targets})
+    def make_prediction(self, sess, x, targets=None):
+        if targets is None:
+            return sess.run(self.out, feed_dict={self.inputs: x})
+        else:
+            return sess.run([self.out, self.loss], feed_dict={self.inputs: x, self.targets: targets})
+
 
     def train(self, sess, x , targets):
         # y, y1 = sess.run([self.y, self.y1])
         rule, helper, mul, back, den = sess.run([self.rules, self.helper, self.mul, self.back_to_matrix, self.den], feed_dict={self.inputs: x, self.targets: targets})
         y, ai_, ci_,out, l, _ = sess.run([self.y, self.ai, self.ci, self.out, self.loss, self.optimize], feed_dict={self.inputs: x, self.targets: targets})
         return l, out, ai_, ci_, y
+
+
+    def save_weights(self, path, sess):
+        y_, ai_, ci_ = sess.run([self.y, self.ai, self.ci])
+        json_dict = {}
+        json_dict['ai'] = ai_.tolist()
+        json_dict['ci'] = ci_.tolist()
+        json_dict['y'] = y_.tolist()
+        with open(path, 'w', encoding='utf-8') as f:
+            f.write(json.dumps(json_dict))
 
 
 class Fuzzyloopa():

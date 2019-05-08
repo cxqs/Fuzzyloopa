@@ -37,13 +37,16 @@ class Prepocessing():
         self.features = (self.features - mean) / std
 
 
-    def creat_target(self):
+    def creat_target(self, t=None):
         targets = []
-        for i in range(self.num, len(self.frame[self.column].values)-self.output):
-            targets.append(self.frame[self.column].values[i:i+self.output])
-            # features.append(self.frame[self.column].values[i:i+self.num])
-        self.targets = np.array(targets)
-        # self.targets = np.array(self.frame[self.column].values[self.num:])
+        if not t:
+            for i in range(self.num, len(self.frame[self.column].values)-self.output):
+                targets.append(self.frame[self.column].values[i:i+self.output])
+                self.targets = np.array(targets)
+        else:
+            for i in range(self.num, len(self.frame[self.column].values)-1):
+                targets.append(self.frame[self.column].values[i:i+1])
+        return np.array(targets)
 
 
     def creat_features(self):
