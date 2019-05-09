@@ -16,11 +16,11 @@ def read_weights(path):
 
 
 D = 7  # number of regressors
-T = 5  # delay
+T = 1  # delay
 
-PATH_DATA = 'TimeSeries/Mackey.csv'
-NAME_COL = 'mackey'
-PATH_WEIGHT = 'Weights/Mackey_22_5_7.txt'
+PATH_DATA = 'TimeSeries/zuerich.csv'
+NAME_COL = 'Zuerich'
+PATH_WEIGHT = 'Weights/Zuerich_22_5_7_2400_2600.txt'
 
 series = prep(PATH_DATA, D, T, NAME_COL)
 series.print_info()
@@ -53,7 +53,7 @@ chkLbls_new = lbls_new[2500:2501, :]
 # ai, ci ,y = read_weights('Weights/Algn_22_1_7.txt')
 cfis = CFuzzyloopa(n_inputs=D, n_rules=m, n_output=T, learning_rate=alpha)
 # Training
-num_epochs = 100
+num_epochs = 10000
 # Initialize session to make computations on the Tensorflow graph
 with tf.Session() as sess:
     sess.run(cfis.init_variables)

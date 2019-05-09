@@ -53,9 +53,12 @@ body {
 }
 
 .image-upload-wrap {
-  margin-top: 20%;
+  height:150px;
+  margin-left: 10%;
+  margin-top: 10%;
   border: 4px dashed #1FB264;
   position: relative;
+  width: 80%;
 }
 
 .image-dropping,
@@ -71,6 +74,7 @@ body {
 
 .drag-text {
   text-align: center;
+  margin-top: 5%;
 }
 
 .drag-text h3 {
@@ -89,13 +93,13 @@ body {
 
 .Owndata {
   margin-left: 1%;
-  margin-top:-10%;
+  margin-top:2%;
 }
 
-.Datafromserv {
-  margin-left: 68%;
-  margin-top:-6%;
-}
+/* .Datafromserv {
+  margin-left: 56%;
+  margin-top: 8%;
+} */
 
 .remove-image {
   width: 200px;

@@ -12,31 +12,61 @@
         <script class="jsbin" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
     </head>
     <body>
-        <div class="file-upload">
-          <div class="image-upload-wrap">
-
-          <div class="Owndata">
-              <form action="/Plot/" method="post">
-                <input type="hidden" name="index" value="1">
-                <input type="submit" class="btn btn-primary btn-md" value="Use upload data">
-              </form>
-          </div>
-          <div class="Datafromserv">
+        <!--<div class="file-upload">-->
+          <!--<div class="image-upload-wrap">-->
+          <!--<div class="Datafromserv">-->
+              <!--<form action="/predict_align/" method="post">-->
+                <!--<input type="hidden" name="index">-->
+                <!--<input type="submit" class="btn btn-primary btn-md" value="Use data from server">-->
+              <!--</form>-->
+          <!--</div>-->
+              <!--<form action="/uploads/" method="post" enctype="multipart/form-data">-->
+                  <!--<div class="Owndata">-->
+                        <!--<input type="hidden" name="index" value="1">-->
+                        <!--<input type="submit" class="btn btn-primary btn-md" value="Use upload data">-->
+                  <!--</div>-->
+              <!--</form>-->
+              <!--<input class="file-upload-input" type="file" name="archive" accept="multipart/x-zip">-->
+                <!--<div class="drag-text">-->
+                    <!--<h3>-->
+                        <!--load zip or drag it here-->
+                    <!--</h3>-->
+                <!--</div>-->
+          <!--</div>-->
+        <!--</div>-->
+    <div class="row">
+        <div class="col">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-9">
+            </br>
+        </div>
+        <div class="col-md-3">
+            <div class="Datafromserv">
               <form action="/predict_align/" method="post">
-                <input type="hidden" name="index" value="1">
+                <input type="hidden" name="index">
                 <input type="submit" class="btn btn-primary btn-md" value="Use data from server">
               </form>
           </div>
-              <form action="/predict_align/" method="post">
-
-              </form>
-              <input class="file-upload-input" type="file" name="archive" accept="multipart/x-zip" value="1">
-              <div class="drag-text">
-                <h3>
-                    load zip or drag it here
-                </h3>
-              </div>
-          </div>
         </div>
+    </div>
+    <div class="row">
+        <div class="col">
+                <form action="uploads" method="POST" enctype="multipart/form-data">
+                    <!--<div class="Owndata">-->
+                        <!--<input type="submit" class="btn btn-primary btn-md" value="Use upload data">-->
+                    <!--</div>-->
+                    <div class="image-upload-wrap">
+                        <input class="file-upload-input" type="file" onchange="this.form.submit()" name="file" accept=".csv">
+                        <div class="drag-text">
+                            <h1>
+                                drag and drop your data here
+                            </h1>
+                        </div>
+                    </div>
+                </form>
+        </div>
+    </div>
     </body>
 </html>

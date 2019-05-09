@@ -1,6 +1,8 @@
 import json
 import tensorflow as tf
 import numpy as np
+import csv
+import pandas as pd
 from flask import Flask, render_template, request
 from Model.Models import CFuzzyloopa
 from Preprocessing.Preprocessing import Prepocessing as prep
@@ -40,6 +42,7 @@ app = Flask(__name__)
 @app.route('/')
 def main():
     return render_template('home.html')
+
 
 
 @app.route('/predict_align/', methods=['POST'])
@@ -121,6 +124,23 @@ def go_mackey():
         line_values = all_data[2300:finish]
 
     return render_template('plot.html', labels=line_labels, values=line_values, predic=prediction,label_name='Zuerich')
+
+
+@app.route('/uploads/', methods=['GET', 'POST'])
+def go_upload():
+    if request.method == 'POST':
+        if not 'file' in request.files:
+            return "dfdf"
+        file = request.files['file']
+        df = pd.read_csv(file.stream)
+        all_data = list(df['Adj Close'].values)
+        data_plot = all_data[:-1]
+        predicted = all_data[-1]
+
+        print(predicted)
+
+
+
 
 
 if __name__ == '__main__':
