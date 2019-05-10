@@ -127,3 +127,10 @@ body {
   border: 0;
   transition: all .2s ease;
 }
+
+.info {
+    text-align: left;
+    background: #0099cc;
+    color: #eeeeee;
+    height: 120%;
+}

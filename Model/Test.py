@@ -16,11 +16,11 @@ def read_weights(path):
 
 
 D = 7  # number of regressors
-T = 1  # delay
+T = 4  # delay
 
-PATH_DATA = 'TimeSeries/zuerich.csv'
-NAME_COL = 'Zuerich'
-PATH_WEIGHT = 'Weights/Zuerich_22_5_7_2400_2600.txt'
+PATH_DATA = '../TimeSeries/manning.csv'
+NAME_COL = 'manning'
+PATH_WEIGHT = '../Weights/manning.txt'
 
 series = prep(PATH_DATA, D, T, NAME_COL)
 series.print_info()
@@ -41,19 +41,19 @@ chkLbls_new = lbls_new[len(lbls_new) - round(len(lbls_new) * 0.3):]
 m = 22
 alpha = 0.001  # learning rate
 # batch_size = 700 best for
-batch_size = 10
+batch_size = 49
 
 
-trnData_new = data_new[0:1000, :]
-trnLbls_new = lbls_new[0:1000,:]
+trnData_new = data_new[0:2400, :]
+trnLbls_new = lbls_new[0:2400,:]
 
-chkData_new = data_new[2500:2501, :]
-chkLbls_new = lbls_new[2500:2501, :]
+chkData_new = data_new[2400: 2401, :]
 
-# ai, ci ,y = read_weights('Weights/Algn_22_1_7.txt')
+# chkData_new = list(np.reshape(list(series.frame['mackey'].values[-8:-1]),[1,-1]))
+# ai, ci ,y = read_weights('../Weights/mackey.txt')
 cfis = CFuzzyloopa(n_inputs=D, n_rules=m, n_output=T, learning_rate=alpha)
 # Training
-num_epochs = 10000
+num_epochs = 500
 # Initialize session to make computations on the Tensorflow graph
 with tf.Session() as sess:
     sess.run(cfis.init_variables)
@@ -71,9 +71,9 @@ with tf.Session() as sess:
             cfis.save_weights(PATH_WEIGHT, sess)
             lbls_new1 = series.creat_target(t=1)
             val_pred = cfis.make_prediction(sess, chkData_new)
-            plt.plot([x for x in range(2300, len(lbls_new1[:2505]))], lbls_new[2300:2505], color='blue')
+            plt.plot([x for x in range(1000,len(lbls_new1[:2401]))], lbls_new[1000:2401], color='blue')
             # plt.plot([x for x in range(len(lbls_new) - round(len(lbls_new) * 0.3), len(lbls_new) - round(len(lbls_new) * 0.3) + T)], val_pred[0], color= 'yellow')
             # plt.plot([x for x in range(len(lbls_new) - round(len(lbls_new) * 0.3), len(lbls_new))], val_pred, color='yellow')
-            plt.plot([x for x in range(2500 ,2505)], val_pred[0], color='red')
+            plt.plot([x for x in range(2400 ,2401)], val_pred[0], color='red')
             # plt.plot([x for x in range(0,lbls_new.size - round(len(lbls_new) * 0.3))], trn_pred, color='green')
     plt.show()

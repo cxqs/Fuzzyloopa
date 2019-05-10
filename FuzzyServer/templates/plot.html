@@ -6,12 +6,24 @@
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/base.css') }}">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js"></script>
+  <style type="text/css">
+    A:link {
+    text-decoration: none; /* Убирает подчеркивание для ссылок */
+    color: white;
+    }
+    A:visited { text-decoration: none; color: white;}
+    A:active { text-decoration: none; color: white;}
+    A:hover {
+    ext-decoration: none; /* Делает ссылку подчеркнутой при наведении на нее курсора */
+    color: white; /* Цвет ссылки */
+    }
+  </style>
 </head>
 
 <body>
   <div class="row">
     <div class="col">
-      <div class="well1" style="color: rgb(234,241,245)"><h1>Fuzzyloop</h1></div>
+        <div class="well1" style="color: rgb(234,241,245)"><h1><a href="/">Fuzzyloop</a></h1></div>
     </div>
   </div>
   <div class="row">
@@ -126,7 +138,7 @@
         </div>
         <div class="row">
             <div class="col-md-12">
-              <form action="/predict_Zuerich/" method="post">
+              <form action="/predict_Temps/" method="post">
                 <input type="hidden" name="index" value="2">
                 <input type="submit" class="btn btn-primary btn-md" value="Zuerich">
               </form>

@@ -1,0 +1,8 @@
+h1 {
+  background-color: rgb(0, 123, 255);
+  /*background-color: rgba(151, 187, 205, 0.64);*!*/
+  height: 70px;
+  width: 100%;
+}
+
+html { overflow:  hidden; }

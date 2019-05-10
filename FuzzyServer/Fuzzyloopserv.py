@@ -1,9 +1,8 @@
 import json
 import tensorflow as tf
 import numpy as np
-import csv
 import pandas as pd
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, abort
 from Model.Models import CFuzzyloopa
 from Preprocessing.Preprocessing import Prepocessing as prep
 
@@ -14,10 +13,11 @@ ALPHA = 0.01  # learning rate
 M = 22
 
 
-def read_data(path, name, d, t, start, finish):
+def read_data(path, name, d, t, start, finish, normalize=True):
     series = prep(path, d, t, name)
     series.creat_features()
-    series.normalize_features()
+    if normalize:
+        series.normalize_features()
     series.creat_target()
 
     data = np.array(series.features)[:finish]
@@ -72,12 +72,14 @@ def go_align():
 
     return render_template('plot.html', labels=line_labels, values=line_values, predic=prediction,label_name='Align')
 
-@app.route('/predict_Zuerich/', methods=['POST'])
-def go_zuerich():
+@app.route('/predict_Temps/', methods=['POST'])
+def go_temps():
 
-    ai_Zuerich, ci_Zuerich, y_Zuerich = read_weights('../Weights/Zuerich_22_1_15_2.txt')
-    cfis = CFuzzyloopa(n_inputs=D, n_rules=M, n_output=T, learning_rate=ALPHA, ai=ai_Zuerich, ci=ci_Zuerich, y=y_Zuerich)
-    lbls, chkData_new, chkLbls_new = read_data('../TimeSeries/zuerich.csv', 'Zuerich', D, T, 2400, 2600)
+    start = 2000
+    finish = 2001
+    ai_Temps, ci_Temps, y_Temps = read_weights('../Weights/owndata/temps.txt')
+    cfis = CFuzzyloopa(n_inputs=D, n_rules=M, n_output=T, learning_rate=ALPHA, ai=ai_Temps, ci=ci_Temps, y=y_Temps)
+    lbls, chkData_new, chkLbls_new = read_data('../TimeSeries/temps.csv', 'temps', D, T, start, finish, normalize=False)
 
     with tf.Session() as sess:
         sess.run(cfis.init_variables)
@@ -86,16 +88,16 @@ def go_zuerich():
         for ch in lbls:
             all_data.append(ch[0])
 
-        val_pred, val_loss = cfis.make_prediction(sess, chkData_new)
-        prediction = [-1 for i in range(len(all_data) - len(val_pred))]
-        for ch in val_pred:
-            prediction.append(ch[0])
+        val_pred = cfis.make_prediction(sess, chkData_new)
+        prediction = [-1 for i in range(0,start)]
+        prediction.append(val_pred[0][0])
 
-        labels = [i for i in range(2800)]
+
+        labels = [i for i in range(0,finish)]
         line_labels = labels
-        line_values = all_data
+        line_values = all_data[0:finish]
 
-    return render_template('plot.html', labels=line_labels, values=line_values, predic=prediction,label_name='Zuerich')
+    return render_template('plot.html', labels=line_labels, values=line_values, predic=prediction,label_name='Temps')
 
 
 @app.route('/predict_Mackey/', methods=['POST'])
@@ -128,20 +130,45 @@ def go_mackey():
 
 @app.route('/uploads/', methods=['GET', 'POST'])
 def go_upload():
+
+    D = 7
+    T = 1
+    ALPHA = 0.01  # learning rate
+    M = 22
     if request.method == 'POST':
         if not 'file' in request.files:
-            return "dfdf"
+            abort(400, 'Some problem with download')
+            return render_template('/')
         file = request.files['file']
         df = pd.read_csv(file.stream)
-        all_data = list(df['Adj Close'].values)
-        data_plot = all_data[:-1]
-        predicted = all_data[-1]
+        name = file.filename
+        name_of_col = name.split('.')[0]
+        try:
+            ai_, ci_, y_ = read_weights('../Weights/owndata/{0}.txt'.format(name_of_col.lower()))
+            if name == 'manning.csv':
+                T = 4
+            cfis = CFuzzyloopa(n_inputs=D, n_rules=M, n_output=T, learning_rate=ALPHA, ai=ai_, ci=ci_, y=y_)
+            with tf.Session() as sess:
+                sess.run(cfis.init_variables)
+                all_data = df[name_of_col.lower()].values
+                data_plot = list(all_data)[:]
+                if name == 'manning.csv':
+                    mean = df[name_of_col.lower()].mean()
+                    std = df[name_of_col.lower()].std()
+                    all_data = (all_data - mean) / std
+                data_for_pred = list(np.reshape(all_data[-D-T:-T],[1,-1]))
+                predicted = all_data[-1]
+                labels = [i for i in range(0,2800)]
+                line_labels = labels
+                line_values = data_plot
 
-        print(predicted)
-
-
-
-
+                val_pred = cfis.make_prediction(sess, data_for_pred)
+                prediction = [-1 for i in range(0, 2800-T)]
+                prediction.extend(val_pred[0,:])
+        except:
+            abort(400, 'We doesnt have weights for this dataset, pls send your data to dikrivenkov@edu.hse.ru')
+        return render_template('fromowndata.html', labels=line_labels, values=line_values, predic=prediction,
+                               label_name='real data')
 
 if __name__ == '__main__':
     app.run()
