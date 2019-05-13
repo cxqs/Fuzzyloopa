@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import os
 
 
@@ -62,7 +61,3 @@ class Prepocessing():
         test_start = train_end
         test_end = len(self.features)
         return self.features[np.arange(train_start, train_end), :]
-
-    def plot_graph(self):
-        plt.plot(self.frame[self.column])
-        plt.show()

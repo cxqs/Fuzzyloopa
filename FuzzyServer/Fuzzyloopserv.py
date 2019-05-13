@@ -2,7 +2,7 @@ import json
 import tensorflow as tf
 import numpy as np
 import pandas as pd
-from flask import Flask, render_template, request, abort
+from flask import Flask, render_template, request, abort, redirect, url_for
 from Model.Models import CFuzzyloopa
 from Preprocessing.Preprocessing import Prepocessing as prep
 
@@ -39,10 +39,14 @@ def read_weights(path):
 
 app = Flask(__name__)
 
+@app.route('/<somevar>')
 @app.route('/')
-def main():
-    return render_template('home.html')
-
+def main(somevar=None):
+    a = somevar
+    if somevar == None:
+        return render_template('home.html')
+    else:
+        return render_template('home.html', messegeid="Подходящих весов для данного временного ряда пока нет")
 
 
 @app.route('/predict_align/', methods=['POST'])
@@ -62,6 +66,9 @@ def go_align():
             all_data.append(ch[0])
 
         val_pred, val_loss = cfis.make_prediction(sess, chkData_new, chkLbls_new)
+        mad = cfis.MAD(val_pred, chkLbls_new)
+        mape = cfis.MAPE(val_pred, chkLbls_new)
+        smape = cfis.SMAPE(val_pred, chkLbls_new)
         prediction = [-1 for i in range(len(all_data) - len(val_pred))]
         for ch in val_pred:
             prediction.append(ch[0])
@@ -70,7 +77,8 @@ def go_align():
         line_labels = labels
         line_values = all_data
 
-    return render_template('plot.html', labels=line_labels, values=line_values, predic=prediction,label_name='Align')
+
+    return render_template('plot.html', labels=line_labels, values=line_values, predic=prediction,label_name='Align', huber=val_loss, mad=mad, mape=mape, smape=smape)
 
 @app.route('/predict_Temps/', methods=['POST'])
 def go_temps():
@@ -88,7 +96,10 @@ def go_temps():
         for ch in lbls:
             all_data.append(ch[0])
 
-        val_pred = cfis.make_prediction(sess, chkData_new)
+        val_pred, val_loss = cfis.make_prediction(sess, chkData_new, chkLbls_new)
+        mad = cfis.MAD(val_pred, chkLbls_new)
+        mape = cfis.MAPE(val_pred, chkLbls_new)
+        smape = cfis.SMAPE(val_pred, chkLbls_new)
         prediction = [-1 for i in range(0,start)]
         prediction.append(val_pred[0][0])
 
@@ -97,7 +108,7 @@ def go_temps():
         line_labels = labels
         line_values = all_data[0:finish]
 
-    return render_template('plot.html', labels=line_labels, values=line_values, predic=prediction,label_name='Temps')
+    return render_template('plot.html', labels=line_labels, values=line_values, predic=prediction,label_name='Temps', huber=val_loss, mad=mad, mape=mape, smape=smape)
 
 
 @app.route('/predict_Mackey/', methods=['POST'])
@@ -116,7 +127,10 @@ def go_mackey():
         for ch in lbls:
             all_data.append(ch[0])
 
-        val_pred = cfis.make_prediction(sess, chkData_new)
+        val_pred, val_loss = cfis.make_prediction(sess, chkData_new, chkLbls_new)
+        mad = cfis.MAD(val_pred, chkLbls_new)
+        mape = cfis.MAPE(val_pred, chkLbls_new)
+        smape = cfis.SMAPE(val_pred, chkLbls_new)
         prediction = [-1 for i in range(2300,start)]
         prediction.extend(val_pred[0][:])
 
@@ -125,7 +139,7 @@ def go_mackey():
         line_labels = labels
         line_values = all_data[2300:finish]
 
-    return render_template('plot.html', labels=line_labels, values=line_values, predic=prediction,label_name='Zuerich')
+    return render_template('plot.html', labels=line_labels, values=line_values, predic=prediction,label_name='Zuerich', huber=val_loss, mad=mad, mape=mape, smape=smape)
 
 
 @app.route('/uploads/', methods=['GET', 'POST'])
@@ -135,15 +149,15 @@ def go_upload():
     T = 1
     ALPHA = 0.01  # learning rate
     M = 22
-    if request.method == 'POST':
-        if not 'file' in request.files:
-            abort(400, 'Some problem with download')
-            return render_template('/')
-        file = request.files['file']
-        df = pd.read_csv(file.stream)
-        name = file.filename
-        name_of_col = name.split('.')[0]
-        try:
+    try:
+        if request.method == 'POST':
+            if not 'file' in request.files:
+                abort(400, 'Some problem with download')
+                return render_template('/')
+            file = request.files['file']
+            df = pd.read_csv(file.stream)
+            name = file.filename
+            name_of_col = name.split('.')[0]
             ai_, ci_, y_ = read_weights('../Weights/owndata/{0}.txt'.format(name_of_col.lower()))
             if name == 'manning.csv':
                 T = 4
@@ -165,9 +179,9 @@ def go_upload():
                 val_pred = cfis.make_prediction(sess, data_for_pred)
                 prediction = [-1 for i in range(0, 2800-T)]
                 prediction.extend(val_pred[0,:])
-        except:
-            abort(400, 'We doesnt have weights for this dataset, pls send your data to dikrivenkov@edu.hse.ru')
-        return render_template('fromowndata.html', labels=line_labels, values=line_values, predic=prediction,
+    except:
+        return redirect(url_for('main', somevar='error'))
+    return render_template('fromowndata.html', labels=line_labels, values=line_values, predic=prediction,
                                label_name='real data')
 
 if __name__ == '__main__':

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title> "{{title}}" </title>
+  <title> Fuzztloop </title>
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/base.css') }}">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js"></script>
@@ -154,6 +154,19 @@
                 <input type="submit" class="btn btn-primary btn-md" value="Mackey">
               </form>
             </div>
+        </div>
+        <div class="row">
+          <div class="col">
+              <br>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+              huber loss:<br> {{huber}} <br>
+              mape: {{mape}} <br>
+              mad: {{mad}} <br>
+              smape: {{smape}} <br>
+          </div>
         </div>
     </div>
   </div>

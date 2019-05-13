@@ -47,7 +47,7 @@
             <div class="Datafromserv">
               <form action="/predict_align/" method="post">
                 <input type="hidden" name="index">
-                <input type="submit" class="btn btn-primary btn-md" value="Use data from server">
+                <input type="submit" class="btn btn-primary btn-md" value="Перейти к временным рядам">
               </form>
           </div>
         </div>
@@ -62,7 +62,7 @@
                         <input class="file-upload-input" type="file" onchange="this.form.submit()" name="file" accept=".csv">
                         <div class="drag-text">
                             <h1>
-                                drag and drop your data here
+                                Перетащите свой временной ряд сюда
                             </h1>
                         </div>
                     </div>
@@ -91,7 +91,7 @@
     </div>
     <div class="row">
         <div class="col">
-            </br>
+            {{messegeid}}
         </div>
     </div>
     <div class="row">
@@ -102,9 +102,9 @@
     <div class="row">
         <div class="col">
             <div class="info">
-                Для получения доп. информации и для прогнозирования <br>
-                вашего временного ряда обращайтесь на почту: <br>
-                dikrivenkov@edu.hse.ru
+                - Для получения доп. информации <br>
+                - Для прогнозирования вашего временного ряда<br>
+                Обращайтесь на почту: dkrivenkov@edu.hse.ru
             </div>
         </div>
     </div>
