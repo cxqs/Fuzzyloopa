@@ -41,6 +41,11 @@
                   predict[i] = null;
               }
             }
+            for (i = 0; i < 2800; i++) {
+              if (data_all[i] === -1) {
+                  data_all[i] = null;
+              }
+            }
             // Global Options
             Chart.defaults.global.defaultFontFamily = 'Lato';
             Chart.defaults.global.defaultFontSize = 18;

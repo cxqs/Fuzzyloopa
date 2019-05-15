@@ -171,10 +171,11 @@ def go_upload():
                     std = df[name_of_col.lower()].std()
                     all_data = (all_data - mean) / std
                 data_for_pred = list(np.reshape(all_data[-D-T:-T],[1,-1]))
-                predicted = all_data[-1]
                 labels = [i for i in range(0,2800)]
                 line_labels = labels
                 line_values = data_plot
+                for i in range(1,T+1):
+                    line_values[-i] = -1
 
                 val_pred = cfis.make_prediction(sess, data_for_pred)
                 prediction = [-1 for i in range(0, 2800-T)]
