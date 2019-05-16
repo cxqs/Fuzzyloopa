@@ -3,6 +3,10 @@ body {
   background-color: #eeeeee;
 }
 
+html {
+    overflow: hidden;
+}
+
 .file-upload {
   background-color: #ffffff;
   width: 600px;
