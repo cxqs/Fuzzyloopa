@@ -1,4 +1,5 @@
 # Fuzzyloopa
+HSE 2nd coursework
 Paper:
 https://arxiv.org/pdf/1212.2671.pdf
 
